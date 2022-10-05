@@ -21,6 +21,10 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
+      - run: curl -fsSL https://packages.redis.io/gpg | sudo gpg --dearmor -o /usr/share/keyrings/redis-archive-keyring.gpg
+      - run: sudo apt-get update
+      - run: sudo apt-get install redis
+      - run: redis-server
       - run: npm install
       - run: npm test
 
