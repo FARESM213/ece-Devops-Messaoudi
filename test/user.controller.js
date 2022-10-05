@@ -43,8 +43,8 @@ describe('User', () => {
     // })
   })
 
-     Create test for the get method
-   describe('Get', ()=> {   
+   //  Create test for the get method
+ /*  describe('Get', ()=> {   
      it('get a user by username', (done) => {
      
 	     client.get('framework', function(err, reply) {
@@ -53,7 +53,7 @@ describe('User', () => {
        // 1. First, create a user to make this unit test independent from the others
       // 2. Then, check if the result of the get method is correct
        done()
-    })
+    })*/
   //
   //   it('cannot get a user when it does not exist', (done) => {
   //     // Chech with any invalid user
