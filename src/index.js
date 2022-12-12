@@ -3,7 +3,7 @@ const userRouter = require('./routes/user')
 const bodyParser = require('body-parser')
 
 const app = express()
-const port = process.env.PORT || 3000
+const port = process.env.PORT || 4000
 
 const db = require('./dbClient')
 db.on("error", (err) => {
