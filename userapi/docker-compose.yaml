@@ -14,7 +14,7 @@ services:
       - redis
     build: .
     ports:
-      - "4000:8080"
+      - "3000:8080"
     environment: 
       - REDIS_HOST=redis
       - REDIS_PORT=6379
