@@ -1,15 +1,11 @@
 version: "3"
 
 services:
-
   redis:
-
     image: redis
     volumes:
       - db-data:/data
-
   web:
-
     depends_on:
       - redis
     build: ./userapi
