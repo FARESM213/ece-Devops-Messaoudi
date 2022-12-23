@@ -1,0 +1,1 @@
+{"virtualbox":{"/devopsapi":{"guestpath":"/devopsapi","hostpath":"C:/Users/33783/Documents/GitHub/ece-Devops-Messaoudi/userapi","disabled":false,"__vagrantfile":true},"/vagrant":{"guestpath":"/vagrant","hostpath":"C:/Users/33783/Documents/GitHub/ece-Devops-Messaoudi/iac","disabled":false,"__vagrantfile":true}}}
