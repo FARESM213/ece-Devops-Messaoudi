@@ -10,6 +10,9 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: userapi
 
     strategy:
       matrix:
@@ -44,5 +47,6 @@ jobs:
           with:
             heroku_api_key: ${{secrets.HEROKU_API_KEY}}
             heroku_app_name: "devops" #Must be unique in Heroku
-            heroku_email: "fares.messaoudi@edu.ece.fr"    
+            heroku_email: "fares.messaoudi@edu.ece.fr"
+            appdir: userapi    
     
