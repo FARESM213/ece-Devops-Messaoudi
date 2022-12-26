@@ -1,0 +1,12 @@
+---
+- name: Installation
+  shell: |
+    sudo apt install npm -y
+    sudo npm install -g n
+    sudo n latest
+    cd ../../devopsapi
+    sudo npm install --no-bin-links
+    sudo timedatectl set-local-rtc 1
+    sudo apt-get update -y
+    sudo apt install redis-server -y
+    sudo npm install redis-status -y

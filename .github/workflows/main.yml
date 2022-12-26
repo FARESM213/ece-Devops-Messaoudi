@@ -9,7 +9,10 @@ on:
 jobs:
   build:
 
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: userapi
 
     strategy:
       matrix:
@@ -31,6 +34,19 @@ jobs:
         redis-version: ${{ matrix.redis-version }}
 
     - run: npm install
-
     - run: npm test
 
+  deploy:
+      
+      needs: build
+      runs-on: ubuntu-latest
+
+      steps:
+        - uses: actions/checkout@v2
+        - uses: akhileshns/heroku-deploy@v3.12.12 # This is the action
+          with:
+            heroku_api_key: ${{secrets.HEROKU_API_KEY}}
+            heroku_app_name: "devops" #Must be unique in Heroku
+            heroku_email: "fares.messaoudi@edu.ece.fr"
+            appdir: userapi    
+    
