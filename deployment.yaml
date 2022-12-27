@@ -12,7 +12,7 @@ spec:
   template:
     metadata:
       labels:
-        app: nodeapp 
+        app: nodeapp
     spec:
       containers:
       - name: redis
@@ -21,12 +21,13 @@ spec:
         - containerPort: 6379
         volumeMounts:
         - mountPath: /srv/www
-          name: redis-storage
+          name: pv-storage
       - name: nodeserver
         image: fafiso/userapi_project_devops:latest
         ports:
         - containerPort: 8080
-
+      
       volumes:
-      - name: redis-storage
-        emptyDir: {}
+      - name: pv-storage
+        persistentVolumeClaim:
+          claimName: pv-claim
