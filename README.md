@@ -184,7 +184,7 @@ For this, in addition to installing Vagrant, you have to make sure you have inst
 
 ## Creating and provisionning the virtual machine (VM)  
 
-* Go to the [/IaC](https://github.com/chemsss/devops-project/tree/main/IaC) directory (where there is the [Vagrantfile](https://github.com/chemsss/devops-project/blob/main/IaC/Vagrantfile)) and run in the terminal:
+* Go to the [/IaC](/iac) directory (where there is the [Vagrantfile](/iac/VagrantFile)) and run in the terminal:
 
 ```bash
 vagrant up --provision
