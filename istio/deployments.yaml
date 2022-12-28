@@ -1,0 +1,128 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-deployment
+  labels:
+    app: redis
+    version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: redis
+        version: v1
+    spec:
+      containers:
+      - name: redis
+        image: redis
+        ports:
+          - containerPort: 6379
+      volumes:
+      - name: pv-storage
+        persistentVolumeClaim:
+          claimName: pv-claim
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-deployment
+  labels:
+    app: redis
+    version: v2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+      version: v2
+  template:
+    metadata:
+      labels:
+        app: redis
+        version: v2
+    spec:
+      containers:
+      - name: redis
+        image: redis
+        ports:
+          - containerPort: 6379
+      volumes:
+      - name: pv-storage
+        persistentVolumeClaim:
+          claimName: pv-claim
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nodeapp-deployment
+  labels:
+    app: nodeapp
+    version: v1
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nodeapp
+      version: v1 
+  template:
+    metadata:
+      labels:
+        app: nodeapp
+        version: v1
+    spec:
+      containers:
+      - name: nodeapp
+        image:  fafiso/userapi_project_devops:latest
+        ports:
+          - containerPort: 8080
+        env:
+          - name: REDIS_HOST
+            value: redis-master
+          - name: REDIS_PORT
+            value: "6379"
+      volumes:
+      - name: pv-storage
+        persistentVolumeClaim:
+          claimName: pv-claim
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nodeapp-deployment
+  labels:
+    app: nodeapp
+    version: v2
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nodeapp
+      version: v2
+  template:
+    metadata:
+      labels:
+        app: nodeapp
+        version: v2
+    spec:
+      containers:
+      - name: nodeapp
+        image:  fafiso/userapi_project_devops:latest
+        ports:
+          - containerPort: 8080
+        volumeMounts:
+            - mountPath: /srv/www
+              name: pv-storage
+        env:
+          - name: REDIS_HOST
+            value: redis-master
+          - name: REDIS_PORT
+            value: "6379"
+        volumes:
+        - name: pv-storage
+          persistentVolumeClaim:
+            claimName: pv-claim

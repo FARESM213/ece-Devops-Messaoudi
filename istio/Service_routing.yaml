@@ -1,0 +1,20 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: nodeapp-service
+spec:
+  hosts:
+    - nodeapp-service
+  http:
+  - match:
+    - headers:
+        username:
+          exact: lydia
+    route:
+    - destination:
+        host: nodeapp-service
+        subset: v1
+  - route:
+    - destination:
+        host: nodeapp-service
+        subset: v2

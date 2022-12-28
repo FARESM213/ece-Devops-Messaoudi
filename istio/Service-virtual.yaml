@@ -1,0 +1,25 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Service
+metadata:
+  name: redis-service
+spec:
+  hosts:
+  - redis-service
+  http:
+  - route:
+    - destination:
+        host: redis-service
+        subset: v1
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: nodeapp-service
+spec:
+  hosts:
+  - nodeapp-service
+  http:
+  - route:
+    - destination:
+        host: nodeapp-service
+        subset: v1

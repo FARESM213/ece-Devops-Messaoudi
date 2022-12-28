@@ -373,7 +373,7 @@ minikube status
 
 ## Running the Kubernetes deployments
 
-* Go to the [/k8s](https://github.com/chemsss/devops-project/tree/main/k8s) directory and run this command for every file:
+* Go to the [/k8s](/k8s/) directory and run this command for every file:
 ```bash
 kubectl apply -f <file_name.yaml>
 ```  
@@ -431,7 +431,7 @@ minikube dashboard
 
 * Run the following command to the userapi service:
 ```bash
- kubectl port-forward service/userapi-deployment 3000:3000
+ kubectl port-forward service/nodeapp-deployment 3000:3000
 ```  
   
 The home page of our app should display when going to http://localhost:3000/ on your browser.
@@ -444,15 +444,6 @@ Outputs the following:
    
 ![image](https://user-images.githubusercontent.com/61418782/147184947-bfedbd4a-1e16-4a56-95d0-441fd79f991c.png)  
   
-* You can send a bash command to one of the 3 pod replicas created with the userapi deployment with the following command:
-```bash
- kubectl exec <POD_NAME> -- <COMMAND>
- #or
- kubectl exec -it <POD_NAME> -- <COMMAND>
-```  
-  
-
-
 
 # 7. Making a service mesh using Istio
 
@@ -476,20 +467,18 @@ Follow the installation instructions until the [Deploy the sample application](h
 
 ## Yaml Deployment files
 
-With Istio, we are going to try to route requests between 2 different version of our app. So, in the [istio](https://github.com/chemsss/devops-project/tree/main/istio) folder, we have changed the deployment.yaml file and copy pasted the userapi et redis deployments, so now we have 4 deployments. However, the first userapi et redis deployments are linked to the version "v1" and the 2 others to version "v2".
+For this part, we have decided to change our deployment.yaml and services.yaml to have a better distinction between the 2 differents pods redis and node.js. With Istio, we are going to try to route requests between 2 different version of our app. So, in the istio folder, we have changed the deployment.yaml file andd doubled the nodeappi et redis deployments, so now we have 4 deployments.Two of them linked to the version "v1" and the others to second one "v2".
 
-* Run the following command in the [/istio](https://github.com/chemsss/devops-project/tree/main/istio) directory for each file in the folder:  
+* Run the following command in the /istio directory for each file in the folder:  
 ```bash
 kubectl apply -f <file_name.yaml>
 ```   
   
-
 ## Routing  
-  
 
 * Default routing
   
-By applying virtual services, we can set the default version the microservices that we want. In the [virtual-service-v1-v2.yaml](https://github.com/chemsss/devops-project/tree/main/istio/virtual-service-v1-v2.yaml) file, we have set the version v1 for redis and for userapi as the default version:  
+By applying virtual services, we can set the default version the microservices that we want. In the [Service-virtual.yaml](istio/Service-virtual.yaml) file, we have set the version v1 for redis and for userapi as the default version:  
   
 ```yaml
 apiVersion: networking.istio.io/v1alpha3
@@ -508,77 +497,71 @@ spec:
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: userapi-service
+  name: nodeapp-service
 spec:
   hosts:
-  - userapi-service
+  - nodeapp-service
   http:
   - route:
     - destination:
-        host: userapi-service
+        host: nodeapp-service
         subset: v1
 ```  
   
-
 * User identity based routing  
   
-With the [virtual-service-user-routing.yaml](https://github.com/chemsss/devops-project/tree/main/istio/virtual-service-v1-v2.yaml) file, we applied a virtual service to have a user based routing.   
+With the [Service.routing.yaml](istio/Service_routing.yaml) file, we applied a virtual service to have a user based routing.   
   
 ```yaml
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: userapi-service
+  name: nodeapp-service
 spec:
   hosts:
-    - userapi-service
+    - nodeapp-service
   http:
   - match:
     - headers:
         username:
-          exact: chems
+          exact: lydia
     route:
     - destination:
-        host: userapi-service
+        host: nodeapp-service
         subset: v1
   - route:
     - destination:
-        host: userapi-service
+        host: nodeapp-service
         subset: v2
 ```  
   
-For our service userapi-service, all the connections that are sending an HTTP request with the username equal "chems" in its header will be sent to userapi-service:v2.
-  
-
+For our service nodeapp-service, all the connections that are sending an HTTP request with the username equal "lydia" in its header will be sent to nodeapp-service:v2.
 
 ## Traffic shifting  
   
 Traffic shifting is usually used to migrate traffic gradually from an older version of a microservice to a new one. You can send a part of the whole traffic to be sent to the version of the micro-services of your choice.  
   
-The [virtual-service-traffic-shifting.yaml](https://github.com/chemsss/devops-project/tree/main/istio/virtual-service-v1-v2.yaml) file applies a virtual service that redirect 50% of traffic into the v1 of the userapi deployment and the other 50% into the v2 of userapi:  
+The [Service_Traffic.yaml](istio/Service_Traffic.yaml) file applies a virtual service that redirect 50% of traffic into the v1 of the userapi deployment and the other 50% into the v2 of nodeapp-service:  
   
 ```yaml
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: userapi-service
+  name: nodeapp-service
 spec:
   hosts:
-    - userapi-service
+    - nodeapp-service
   http:
   - route:
     - destination:
-        host: userapi-service
-        subset: 2
+        host: nodeapp-service
+        subset: v2
       weight: 50
     - destination:
-        host: userapi-service
+        host: nodeapp-service
         subset: v1
       weight: 50
 ```  
-  
-
-
 
 # 8. Monitoring containerized application with Prometheus and Grafana  
 
@@ -600,4 +583,4 @@ Follow intructions for the installation of Prometheus: https://istio.io/latest/d
   
 Follow intructions for the installation of Grafana: https://istio.io/latest/docs/ops/integrations/grafana/  
   
-Grafana is also installed through Istio's addons. To create it dashboard, Grafana can import Istio's dashboard through a script that is provided in the above guide. Grafana can be also installed and configured through other methods. There is documentation in the guide to import Istio dashboards with other intallation methods of Grafana.
+  Grafana is also installed through Istio's addons. To create it dashboard, Grafana can import Istio's dashboard through a script that is provided in the above guide. Grafana can be also installed and configured through other methods. There is documentation in the guide to import Istio dashboards with other intallation methods of Grafana.
