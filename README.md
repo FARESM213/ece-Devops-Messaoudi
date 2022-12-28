@@ -365,6 +365,11 @@ Minikube is a tool that makes it easy tu run Kubernetes locally.
 ```bash
 minikube start
 ```   
+You should the following : 
+![image](image/minkubestart.png)
+
+> **Note!** If you dont have exactly this output, make sur to have at least a " Done " sentence. If you encounter some issues, try to reinstall [Docker](https://www.docker.com/get-started) or [Minikube](https://kubernetes.io/docs/tasks/tools/install-minikube/) with all its dependencies 
+
 
 * Check that everything is OK:
 ```bash
