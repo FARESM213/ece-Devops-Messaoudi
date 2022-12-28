@@ -298,11 +298,12 @@ docker build -t userapi .
 ```    
   
 We have also pushed our Docker image to DockerHub.  
-![image](https://user-images.githubusercontent.com/61418782/147173441-fe8ed732-6454-4147-ae47-04f358c9d5b9.png)  
+
+![dockerhub](image/dockerhub.png)  
 
 * So, instead, you can simply pull the image from DockerHub: 
 ```bash
-docker pull chemss/userapi
+docker pull fafiso/devops_userapi
 ```    
 
 * You can check if it appears in your local Docker images:
@@ -312,7 +313,7 @@ docker images
 
 * Then, run the container:
 ```bash
-docker run -p 3000:3000 -d chemss/userapi
+docker run -p 8080:8080 -d fafiso/devops_userapi
 ```   
   
 * Check if it the container is running:
@@ -320,38 +321,41 @@ docker run -p 3000:3000 -d chemss/userapi
 docker ps
 ```  
 
-* By going to http://localhost:3000/, the welcome page of the app will showup:  
+* By going to http://localhost:8080/, the welcome page of the app will showup:  
 
-![image](https://user-images.githubusercontent.com/61418782/147173843-253018e9-31e8-4b6f-a46b-7d1e1212a36b.png)  
-
+![image](image/localhost.png)  
+> **Note!** Don't forget to start the **redis-server** before testing. If you dont, the connection would be aborted.
 
 * Stop the container:
 ```bash
 docker stop <CONTAINER_ID>
 ```  
+Hence,everyone can pull the contenarised image of our application to run its own loacl machine
 
 # 5. Container orchestration using Docker Compose
 
 The image we have built with the Dockerfile runs only a container which has our app but not the database.  
   
-Docker Compose allows us to run multi-container Docker applications. The services and images are set up in the [docker-compose.yaml](https://github.com/chemsss/devops-project/blob/main/docker-compose.yaml) file.  
+Docker Compose allows us to run multi-container Docker applications. The services and images are set up in the [docker-compose.yaml](docker-compose.yaml) file.  
 
 * Run the docker-compose command to create and start the redis and web services from the configuration file:  
 ```bash
 docker-compose up
 ```   
+![image](image/Compose.png)  
+
 
 * By going to http://localhost:3000/, the welcome page of the app will showup:  
 
-![image](https://user-images.githubusercontent.com/61418782/147173843-253018e9-31e8-4b6f-a46b-7d1e1212a36b.png)  
+![image](image/HelloDevops.png)  
 
 * You can delete the containers with:
 ```bash
 docker-compose rm
 ```   
+Then Try the **Usage** section of p **Web App** part to check the database communication.
 
-
-
+![image](image/HelloFares.png)  
 
 # 5. Docker orchestration using Kubernetes 
 
