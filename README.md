@@ -1,23 +1,34 @@
-# User API web application
+   
+  
+# Web application - DevOps Project
 
-It is a basic NodeJS web application exposing REST API that creates and stores user parameters in [Redis database](https://redis.io/).
+Welcome to the repository of our web application DevOps project. The goal of this project is to implement softwares covering the whole DevOps cycle to a simple API web application that uses storages in a Redis database. The softwares help us automate the building, testing, deployment and running of our project.
 
-## Functionality
+In this repository is explained how to set up : 
+* The User API web application
+* A CI/CD pipeline with GitHub Actions and Heroku
+* A Vagrant configured virtual machine provisionned with Ansible
+* A Docker image of our application
+* Container orchestration using Docker Compose
+* Docker orchestration using Kubernetes
+* A service mesh using Istio
+* Monitoring with Prometheus and Grafano to the application containerized in a K8s cluster
+  
+  
+# 1. Web application
 
-1. Start a web server
-2. Create a user
+The app is a basic NodeJS web application exposing REST API where you can create and store user parameters in a [Redis](https://redis.io/) database.  
+You can create a user by sending a curl POST method to the application with the user data, and access that data in the app in the http://localhost:8080/user route and adding to the route /username with the username corresponding the user data you want to access.  
 
 ## Installation
 
-This application is written on NodeJS and it uses Redis database.
+This application is written on NodeJS and it uses a Redis database.
 
 1. [Install NodeJS](https://nodejs.org/en/download/)
-
 2. [Install Redis](https://redis.io/download)
-
 3. Install application
 
-Go to the root directory of the application (where `package.json` file located) and run:
+Go to the userapi/ directory of the cloned repository and run:
 
 ```
 npm install 
@@ -27,13 +38,13 @@ npm install
 
 1. Start a web server
 
-From the root directory of the project run:
+From the /userapi directory of the project run:
 
 ```
-npm start
+npm run start
 ```
 
-It will start a web server available in your browser at http://localhost:3000.
+It will start a web server available in your browser at http://localhost:8080.
 
 2. Create a user
 
@@ -43,14 +54,19 @@ Send a POST (REST protocol) request using terminal:
 curl --header "Content-Type: application/json" \
   --request POST \
   --data '{"username":"sergkudinov","firstname":"sergei","lastname":"kudinov"}' \
-  http://localhost:3000/user
+  http://localhost:8080/user
 ```
 
 It will output:
 
 ```
 {"status":"success","msg":"OK"}
+```  
+After, if you go to http://localhost:3000/user/sergkudinov, with "sergkudinov" being the username that you had in your POST data, it will display in the browser the following, with correspondance to the data that you posted:  
 ```
+{"status":"success","msg":{"firstname":"sergei","lastname":"kudinov"}}
+```
+
 
 Another way to test your REST API is to use [Postman](https://www.postman.com/).
 
@@ -59,10 +75,531 @@ Another way to test your REST API is to use [Postman](https://www.postman.com/).
 From the root directory of the project, run:
 
 ```
-npm test
+npm run test
+```  
+  
+It should pass the 12 tests:  
+
+![image](image/test.png)
+
+> **Note!** You need to run a **redis server** before testing. If you dont, the connection would be aborted and display an error message as below :
+![image](image/test2.png)
+
+
+# 2. CI/CD pipeline with GitHub Actions and Heroku
+
+* The continuous integration workflow has been setup with GitHub Actions.  
+The workflow automates building and tests of our NodeJS project. Before every deployment we check if the workflow tests have passed successfully to make sure the code runs correctly. 
+
+* The continuous deployment has been done with Heroku.  
+Heroku helps us deploying our project and allows automatic deployment. We had to add Heroku to our GitHub Actions workflow.   
+  
+We created our workflow using Github Action provided template for Heroku and the ressources of  [Deploy to Heroku](https://github.com/marketplace/actions/deploy-to-heroku)
+
+  
+We then in the main.yaml have put this code:
+```yaml
+# This workflow will do a clean install of node dependencies, cache/restore them, build the source code and run tests across different versions of node
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
+
+name: Node.js CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: userapi
+
+    strategy:
+      matrix:
+        node-version: [10.x, 12.x, 14.x, 15.x]
+        redis-version: [4, 5, 6]
+        
+    steps:
+    - name: Git checkout
+      uses: actions/checkout@v2
+
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: Start Redis
+      uses: supercharge/redis-github-action@1.4.0
+      with:
+        redis-version: ${{ matrix.redis-version }}
+
+    - run: npm install
+    - run: npm test
+
+  deploy:
+      
+      needs: build
+      runs-on: ubuntu-latest
+
+      steps:
+        - uses: actions/checkout@v2
+        - uses: akhileshns/heroku-deploy@v3.12.12 # This is the action
+          with:
+            heroku_api_key: ${{secrets.HEROKU_API_KEY}}
+            heroku_app_name: "devops" #Must be unique in Heroku
+            heroku_email: "fares.messaoudi@edu.ece.fr"
+            appdir: userapi    
+    
 ```
 
-## Author
+  The heroku_app_name is the name of the Heroku app that we have created in Heroku's website. The API key was retreaved from the Heroku account setting and had to be added in the GitHub secrets. This allows for automatic deployment on Heroku after we any push to GitHub.  
+    
+  We have also, in the Heroku app's deployment settings, enabled automatic deploys and ticked the "Wait for CI to pass before deploy" checkbox.  
+    
+We can check for ourselves the tests in the CI/CD workflow of our GitHub project: 
 
-Sergei Kudinov   
-sergei@adaltas.com
+![image](image/deploy.png)
+
+After CI/CD confirmation, we can also have an access from the Heroku project and get access to the app :
+
+![image](image/heroku.png)
+  
+![image](image/heroku_app.png)  
+
+However, we had only our NodeJS app and not the Redis database, so the deployment on Heroku is only partially functionnal, as the user API does not work.
+So we had to add the Redis service and tried a curl on the https://devops.herokuapp.com/user to confirm our app's functionnality :
+
+# Ajouter le truck de Redis 
+  
+
+# 3. Configuring and provisionning a virtual environment using the IaC approach
+
+To use the Infrastructure as code (IaC) approach, we have used Vagrant to configure and manage our virtual machine and used Ansible to provision the virtual machine. 
+
+## Installation
+
+For this, in addition to installing Vagrant, you have to make sure you have installed VirtualBox (or another [virtualization software that is accepted by Vagrant](https://www.vagrantup.com/docs/providers)).
+
+1. [Install VirtualBox](https://www.virtualbox.org/wiki/Downloads) (or other)
+2. [Install Vagrant](https://www.vagrantup.com/downloads.html)  
+  
+
+## Creating and provisionning the virtual machine (VM)  
+
+* Go to the [/IaC](https://github.com/chemsss/devops-project/tree/main/IaC) directory (where there is the [Vagrantfile](https://github.com/chemsss/devops-project/blob/main/IaC/Vagrantfile)) and run in the terminal:
+
+```bash
+vagrant up --provision
+```  
+  It should start initializing and booting the VM.  
+    
+  The VM's OS is centos/7 which is a basic, highly optimized and small in size version of Ubuntu 18.04 64-bit available for minimal use cases and made by HashiCorp. You can choose whatever OS you want to use in your VM by modifying the VM box property. Ressouces are available online about the [Vagrantfile](https://www.vagrantup.com/docs/vagrantfile) and how to change [boxes](https://www.vagrantup.com/docs/boxes).  
+    
+  Then it will download automatically Ansible and will start the provisionning set up by the Ansible playbooks. The playbooks' tasks set up the downloading and enabling of the packages and services that are needed to run the userapi project on the VM. 
+
+  This installation is executed by the VagrantFile wich use the [Run.yml](iac\playbooks\run.yml) and the [Install.yml](iac\playbooks\roles\app\install\tasks\main.yml) to install all the necessary dependencies :
+
+ ```VagrantFile
+ # -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+
+    # Do not pay attention to this parameter
+    if Vagrant.has_plugin?("vagrant-vbguest")
+      config.vm.provider :virtualbox do |vb|
+        config.vbguest.auto_update = false
+      end
+    end
+  
+    config.vm.synced_folder "../userapi/", "/devopsapi"
+    # Define the gitlab_server VM
+    config.vm.define "Devops_server" do |server|
+      # Specify the Vagrant box to use
+      server.vm.box = "ubuntu/focal64"
+      # Specify the VM ip address
+      config.vm.network "forwarded_port", guest: 80, host: 8000
+      # Specify the VM specs when using the Virtualbox provisioner
+      server.vm.provider "virtualbox" do |vb|
+        vb.name =  "Devops_server.server.local"
+        # VM RAM in MB
+        vb.memory = 2048
+        # VM CPUs
+        vb.cpus = 1
+      end
+      config.vm.provider "vmware_desktop" do |vmware|
+        vmware.vmx["memsize"] = "2048"
+        vmware.vmx["numvcpus"] = "1"
+      end
+    end
+        # Use Vagrant Ansible provisioner
+        config.vm.provision "ansible_local" do |ansible|
+            # The path to the playbooks entry point
+            ansible.playbook = "playbooks/run.yml"
+            ansible.tags = "install"
+          end
+  end
+  
+ ```
+
+You should end up with this confirmation message :
+
+![image](image/provision.png)
+![image](image/provision2.png)
+
+* After the downloads have ended, you can enter your VM via SSH with the following Vagrant command:  
+```bash
+vagrant ssh 
+```  
+![Julien](image/ssh.png)
+
+  The folder userapi located in the repository's clone of your host is shared with the VM thanks to the "synced_folder" folder property in the [Vagrantfile](https://github.com/chemsss/devops-project/blob/main/IaC/Vagrantfile).  
+  * When connecting by SSH, you can find the folder by typing the following commands in the terminal: 
+  
+```bash
+cd ../..
+cd home/devopsapi/
+/home/devopsapi ls
+```  
+You can see that the files being showen by the terminal are the same than the one in the host's folder.   
+   
+![Julien](image/sync.png)
+
+We have also kept in the roles folders a "main.yaml" file with tasks for the installation and launch of GitLab on the VM that works fine. If you want to use it you have to go to /part-2, lunch the VM like above. When installed and launched on the VM, you will be able to access the GitLab page through the 20.20.20.2 address on your host machine thanks to the server.vm.network and ip properties in the [Vagrantfile](part-2\Vagrantfile). You should have this response :
+
+![Vagrantfile](image/vagrant2.png)
+
+We also created our own health check and configure routes to verify the app's wellbeing. Thus, you can consulte the [Health](iac/playbooks/roles/app/healthchecks/tasks/main.yml) and [Readiness](iac/playbooks/roles/app/healthchecks/tasks/main.yml) checks wich respectly verifies the well running and theredis communication
+
+Run the checks with the following command :
+
+```bash
+  ansible-playbook /vagrant/playbooks/run.yml --tags check -i /tmp/vagrant-ansible/inventory/vagrant_ansible_local_inventory
+```  
+You sould get a 'Application correctly running ' message and 'great' if the checks pass the health and readiness tests : 
+
+![Vagrantfile](image/checks.png)
+
+# 4. Docker image of the app
+
+To be able to "containerize" our application we created a Docker image of it. Docker enables us to run our app in the exact environment(s) that we want.
+
+## Installation
+Install [Docker Desktop](https://www.docker.com/get-started)  
+  
+
+* In the root directory of the repository's clone (where there is the [Dockerfile](https://github.com/chemsss/devops-project/blob/main/Dockerfile)), run the following command to build image (don't forget the dot):
+```bash
+docker build -t userapi .
+```    
+  
+We have also pushed our Docker image to DockerHub.  
+![image](https://user-images.githubusercontent.com/61418782/147173441-fe8ed732-6454-4147-ae47-04f358c9d5b9.png)  
+
+* So, instead, you can simply pull the image from DockerHub: 
+```bash
+docker pull chemss/userapi
+```    
+
+* You can check if it appears in your local Docker images:
+```bash
+docker images
+```    
+
+* Then, run the container:
+```bash
+docker run -p 3000:3000 -d chemss/userapi
+```   
+  
+* Check if it the container is running:
+```bash
+docker ps
+```  
+
+* By going to http://localhost:3000/, the welcome page of the app will showup:  
+
+![image](https://user-images.githubusercontent.com/61418782/147173843-253018e9-31e8-4b6f-a46b-7d1e1212a36b.png)  
+
+
+* Stop the container:
+```bash
+docker stop <CONTAINER_ID>
+```  
+
+# 5. Container orchestration using Docker Compose
+
+The image we have built with the Dockerfile runs only a container which has our app but not the database.  
+  
+Docker Compose allows us to run multi-container Docker applications. The services and images are set up in the [docker-compose.yaml](https://github.com/chemsss/devops-project/blob/main/docker-compose.yaml) file.  
+
+* Run the docker-compose command to create and start the redis and web services from the configuration file:  
+```bash
+docker-compose up
+```   
+
+* By going to http://localhost:3000/, the welcome page of the app will showup:  
+
+![image](https://user-images.githubusercontent.com/61418782/147173843-253018e9-31e8-4b6f-a46b-7d1e1212a36b.png)  
+
+* You can delete the containers with:
+```bash
+docker-compose rm
+```   
+
+
+
+
+# 5. Docker orchestration using Kubernetes 
+
+Kubernetes is an open-source system for automating the deployment, scaling and management of containerized applications. Compared to Kubernetes, Docker Compose has limited functionnality.  
+  
+
+## Install Minikube
+Minikube is a tool that makes it easy tu run Kubernetes locally. 
+  
+[Install Minikube](https://kubernetes.io/docs/tasks/tools/install-minikube/) following the instructions depending on your OS.  
+
+* Start Minikube: 
+```bash
+minikube start
+```   
+
+* Check that everything is OK:
+```bash
+minikube status
+```  
+
+## Running the Kubernetes deployments
+
+* Go to the [/k8s](https://github.com/chemsss/devops-project/tree/main/k8s) directory and run this command for every file:
+```bash
+kubectl apply -f <file_name.yaml>
+```  
+* The deployment.yaml file describes the desired states of the redis and userapi deployments.  
+* The service.yaml file exposes the redis and userapi apps as network services and * gives them the right ports.
+* The persistentvolume.yaml file creates a piece of storage in the cluster which has a lifecycle independent of any individual Pod that uses the PersistentVolume.
+* The persistentvolumeclaim.yaml file create a request for storage by a user.  
+  
+## Check that everything is running 
+* Check that the deployments are running:
+```bash
+kubectl get deployments
+```  
+The result should be as following:  
+  
+![image](https://user-images.githubusercontent.com/61418782/147182096-6c5e4f86-72a7-4062-9323-3893180c6db7.png)  
+
+* Check that the services are running:
+```bash
+kubectl get services
+```
+Should output the following:
+  
+![image](https://user-images.githubusercontent.com/61418782/147182248-561421d0-020a-40ad-8d07-1e9589da29fd.png)  
+  
+* Check that the PersistentVolume is running:
+```bash
+kubectl get pv
+```
+Outputs the following:
+  
+![image](https://user-images.githubusercontent.com/61418782/147182440-566d5b12-591d-45ae-9f51-0a21d39ce965.png)  
+  
+* Check that the PersistentVolumeClaim is running:
+```bash
+kubectl get pvc
+```
+Outputs the following:  
+  
+![image](https://user-images.githubusercontent.com/61418782/147182537-ece8b5ed-d51c-4335-b89d-299ea912583c.png)    
+    
+We can see in the outputs that the PersistentVolumeClaim is bound to the PersistentVolume. The claim requests at least 3Gi from our hostPath PersistentVolume.  
+  
+
+* You can also check that everything is running through the minikube dashboard:  
+```bash
+minikube dashboard
+```  
+  
+![image](https://user-images.githubusercontent.com/61418782/147188835-41bea159-c928-4b9a-a724-cccbb7f96d08.png)
+
+
+
+## Accessing the containerized app
+
+* Run the following command to the userapi service:
+```bash
+ kubectl port-forward service/userapi-deployment 3000:3000
+```  
+  
+The home page of our app should display when going to http://localhost:3000/ on your browser.
+
+* Run the following command:
+```bash
+kubectl get pods
+```  
+Outputs the following:
+   
+![image](https://user-images.githubusercontent.com/61418782/147184947-bfedbd4a-1e16-4a56-95d0-441fd79f991c.png)  
+  
+* You can send a bash command to one of the 3 pod replicas created with the userapi deployment with the following command:
+```bash
+ kubectl exec <POD_NAME> -- <COMMAND>
+ #or
+ kubectl exec -it <POD_NAME> -- <COMMAND>
+```  
+  
+
+
+
+# 5. Making a service mesh using Istio
+
+Istio is a service mesh that can control the traffic flow between micro-services.  
+For example, it can be used to redirect a parts of the users into different versions of a service.  
+  
+## Installation  
+  
+* Make sure you have Minikube installed and run:
+```bash
+minikube config set vm-driver virtualbox (or vmware, or kvm2) 
+#or minikube config set vm-driver virtualbox
+minikube start --memory=16384 --cpus=4 --kubernetes-version=v1.18.0 
+#configure the RAM and CPU usage according to your system
+```    
+  
+Intructions: https://istio.io/docs/setup/getting-started/  
+  
+Follow the installation instructions until the [Deploy the sample application](https://istio.io/latest/docs/setup/getting-started/#bookinfo) section.  
+
+
+## Yaml Deployment files
+
+With Istio, we are going to try to route requests between 2 different version of our app. So, in the [istio](https://github.com/chemsss/devops-project/tree/main/istio) folder, we have changed the deployment.yaml file and copy pasted the userapi et redis deployments, so now we have 4 deployments. However, the first userapi et redis deployments are linked to the version "v1" and the 2 others to version "v2".
+
+* Run the following command in the [/istio](https://github.com/chemsss/devops-project/tree/main/istio) directory for each file in the folder:  
+```bash
+kubectl apply -f <file_name.yaml>
+```   
+  
+
+## Routing  
+  
+
+* Default routing
+  
+By applying virtual services, we can set the default version the microservices that we want. In the [virtual-service-v1-v2.yaml](https://github.com/chemsss/devops-project/tree/main/istio/virtual-service-v1-v2.yaml) file, we have set the version v1 for redis and for userapi as the default version:  
+  
+```yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: Service
+metadata:
+  name: redis-service
+spec:
+  hosts:
+  - redis-service
+  http:
+  - route:
+    - destination:
+        host: redis-service
+        subset: v1
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: userapi-service
+spec:
+  hosts:
+  - userapi-service
+  http:
+  - route:
+    - destination:
+        host: userapi-service
+        subset: v1
+```  
+  
+
+* User identity based routing  
+  
+With the [virtual-service-user-routing.yaml](https://github.com/chemsss/devops-project/tree/main/istio/virtual-service-v1-v2.yaml) file, we applied a virtual service to have a user based routing.   
+  
+```yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: userapi-service
+spec:
+  hosts:
+    - userapi-service
+  http:
+  - match:
+    - headers:
+        username:
+          exact: chems
+    route:
+    - destination:
+        host: userapi-service
+        subset: v1
+  - route:
+    - destination:
+        host: userapi-service
+        subset: v2
+```  
+  
+For our service userapi-service, all the connections that are sending an HTTP request with the username equal "chems" in its header will be sent to userapi-service:v2.
+  
+
+
+## Traffic shifting  
+  
+Traffic shifting is usually used to migrate traffic gradually from an older version of a microservice to a new one. You can send a part of the whole traffic to be sent to the version of the micro-services of your choice.  
+  
+The [virtual-service-traffic-shifting.yaml](https://github.com/chemsss/devops-project/tree/main/istio/virtual-service-v1-v2.yaml) file applies a virtual service that redirect 50% of traffic into the v1 of the userapi deployment and the other 50% into the v2 of userapi:  
+  
+```yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: userapi-service
+spec:
+  hosts:
+    - userapi-service
+  http:
+  - route:
+    - destination:
+        host: userapi-service
+        subset: 2
+      weight: 50
+    - destination:
+        host: userapi-service
+        subset: v1
+      weight: 50
+```  
+  
+
+
+
+# 6. Monitoring containerized application with Prometheus and Grafana  
+
+Isitio being a service mesh that identifies the amount of traffic comming into micro-services, it gives also the possibility to monitorize our containerized application thanks to its many addons and packages that can be installed.  
+  
+## Installation  
+  
+Follow the same [installation guide](https://istio.io/docs/setup/getting-started/ ) than in the last part but stop at the [View the dashboard](https://istio.io/latest/docs/setup/getting-started/#dashboard) part. 
+
+
+## Prometheus  
+  
+Follow intructions for the installation of Prometheus: https://istio.io/latest/docs/ops/integrations/prometheus/   
+
+  Prometheus is installed through Istio thanks to addons. Prometheus works by scrapping the data emitted by the Istio service mesh to be able to generate its dashboard. To make it work, you must customize Promeheus' scrapping configurations. Scrapping configurations are provided in the above guide for to scrape Istio's http-monitoring port and Envoy stats. TLS Settings are also provided to scrape using Istio certificates.
+
+
+## Grafana  
+  
+Follow intructions for the installation of Grafana: https://istio.io/latest/docs/ops/integrations/grafana/  
+  
+Grafana is also installed through Istio's addons. To create it dashboard, Grafana can import Istio's dashboard through a script that is provided in the above guide. Grafana can be also installed and configured through other methods. There is documentation in the guide to import Istio dashboards with other intallation methods of Grafana.
