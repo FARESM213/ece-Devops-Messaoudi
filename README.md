@@ -170,12 +170,6 @@ After CI/CD confirmation, we can also have an access from the Heroku project and
   
 ![image](image/heroku_app.png)  
 
-However, we had only our NodeJS app and not the Redis database, so the deployment on Heroku is only partially functionnal, as the user API does not work.
-So we had to add the Redis service and tried a curl on the https://devops.herokuapp.com/user to confirm our app's functionnality :
-
-# Ajouter le truck de Redis 
-  
-
 # 3. Configuring and provisionning a virtual environment using the IaC approach
 
 To use the Infrastructure as code (IaC) approach, we have used Vagrant to configure and manage our virtual machine and used Ansible to provision the virtual machine. 
@@ -357,7 +351,7 @@ Then Try the **Usage** section of p **Web App** part to check the database commu
 
 ![image](image/HelloFares.png)  
 
-# 5. Docker orchestration using Kubernetes 
+# 6. Docker orchestration using Kubernetes 
 
 Kubernetes is an open-source system for automating the deployment, scaling and management of containerized applications. Compared to Kubernetes, Docker Compose has limited functionnality.  
   
@@ -460,7 +454,7 @@ Outputs the following:
 
 
 
-# 5. Making a service mesh using Istio
+# 7. Making a service mesh using Istio
 
 Istio is a service mesh that can control the traffic flow between micro-services.  
 For example, it can be used to redirect a parts of the users into different versions of a service.  
@@ -586,7 +580,7 @@ spec:
 
 
 
-# 6. Monitoring containerized application with Prometheus and Grafana  
+# 8. Monitoring containerized application with Prometheus and Grafana  
 
 Isitio being a service mesh that identifies the amount of traffic comming into micro-services, it gives also the possibility to monitorize our containerized application thanks to its many addons and packages that can be installed.  
   
