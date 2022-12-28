@@ -251,7 +251,7 @@ vagrant ssh
 ```  
 ![Julien](image/ssh.png)
 
-  The folder userapi located in the repository's clone of your host is shared with the VM thanks to the "synced_folder" folder property in the [Vagrantfile](https://github.com/chemsss/devops-project/blob/main/IaC/Vagrantfile).  
+  The folder userapi located in the repository's clone of your host is shared with the VM thanks to the "synced_folder" folder property in the [Vagrantfile](iac/VagrantFile).  
   * When connecting by SSH, you can find the folder by typing the following commands in the terminal: 
   
 ```bash
@@ -286,7 +286,7 @@ To be able to "containerize" our application we created a Docker image of it. Do
 Install [Docker Desktop](https://www.docker.com/get-started)  
   
 
-* In the root directory of the repository's clone (where there is the [Dockerfile](https://github.com/chemsss/devops-project/blob/main/Dockerfile)), run the following command to build image (don't forget the dot):
+* In the root directory of the repository's clone (where there is the [Dockerfile](userapi/Dockerfile)), run the following command to build image (don't forget the dot):
 ```bash
 docker build -t userapi .
 ```    
