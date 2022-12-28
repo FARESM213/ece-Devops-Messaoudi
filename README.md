@@ -286,7 +286,7 @@ To be able to "containerize" our application we created a Docker image of it. Do
 Install [Docker Desktop](https://www.docker.com/get-started)  
   
 
-* In the root directory of the repository's clone (where there is the [Dockerfile](userapi/Dockerfile)), run the following command to build image (don't forget the dot):
+* Inn the [userpai](userapi) diretory (where there is the [Dockerfile](userapi/Dockerfile)), run the following command to build image (don't forget the dot):
 ```bash
 docker build -t userapi .
 ```    
