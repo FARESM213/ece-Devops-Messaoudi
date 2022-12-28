@@ -365,16 +365,18 @@ Minikube is a tool that makes it easy tu run Kubernetes locally.
 ```bash
 minikube start
 ```   
-You should the following : 
-![image](image/minkubestart.png)
-
-> **Note!** If you dont have exactly this output, make sur to have at least a " Done " sentence. If you encounter some issues, try to reinstall [Docker](https://www.docker.com/get-started) or [Minikube](https://kubernetes.io/docs/tasks/tools/install-minikube/) with all its dependencies 
+> **Note!** If you dont have exactly the below output, make sur to have at least a " Done " sentence. If you encounter some issues, try to reinstall [Docker](https://www.docker.com/get-started) or [Minikube](https://kubernetes.io/docs/tasks/tools/install-minikube/) with all its dependencies 
 
 
 * Check that everything is OK:
 ```bash
 minikube status
 ```  
+
+You should the following : 
+
+![image](image/minkubestart.png)
+
 
 ## Running the Kubernetes deployments
 
@@ -394,7 +396,7 @@ kubectl get deployments
 ```  
 The result should be as following:  
   
-![image](https://user-images.githubusercontent.com/61418782/147182096-6c5e4f86-72a7-4062-9323-3893180c6db7.png)  
+![image](image/deployment.png)  
 
 * Check that the services are running:
 ```bash
@@ -402,7 +404,7 @@ kubectl get services
 ```
 Should output the following:
   
-![image](https://user-images.githubusercontent.com/61418782/147182248-561421d0-020a-40ad-8d07-1e9589da29fd.png)  
+![image](image/getservice.png)  
   
 * Check that the PersistentVolume is running:
 ```bash
@@ -410,15 +412,18 @@ kubectl get pv
 ```
 Outputs the following:
   
-![image](https://user-images.githubusercontent.com/61418782/147182440-566d5b12-591d-45ae-9f51-0a21d39ce965.png)  
+  ![image](image/apv.png)  
+  ![image](image/pv.png)  
   
 * Check that the PersistentVolumeClaim is running:
 ```bash
 kubectl get pvc
 ```
 Outputs the following:  
-  
-![image](https://user-images.githubusercontent.com/61418782/147182537-ece8b5ed-d51c-4335-b89d-299ea912583c.png)    
+      
+  ![image](image/apvc.png)  
+  ![image](image/pvc.png)  
+ 
     
 We can see in the outputs that the PersistentVolumeClaim is bound to the PersistentVolume. The claim requests at least 3Gi from our hostPath PersistentVolume.  
   
