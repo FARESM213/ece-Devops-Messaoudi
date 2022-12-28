@@ -278,6 +278,26 @@ You sould get a 'Application correctly running ' message and 'great' if the chec
 
 ![Vagrantfile](image/checks.png)
 
+
+> **Note!** Don't forget to start the **application** before testing. If you dont, the connection would be aborted and you will not pass the test. Go to the /devopsapi folder in vagrant and npm start & :
+
+![Vagrantfile](image/npmstart.png)
+
+* Try to add a user and curl it to test the redis connexion 
+
+You can also try the following to get the same checks as above. 
+
+```bash 
+curl http://localhost:8080/health
+``` 
+or / and
+
+```bash 
+curl http://localhost:8080/rediness
+```
+
+
+ 
 # 4. Docker image of the app
 
 To be able to "containerize" our application we created a Docker image of it. Docker enables us to run our app in the exact environment(s) that we want.
@@ -428,18 +448,9 @@ Outputs the following:
 We can see in the outputs that the PersistentVolumeClaim is bound to the PersistentVolume. The claim requests at least 3Gi from our hostPath PersistentVolume.  
   
 
-* You can also check that everything is running through the minikube dashboard:  
-```bash
-minikube dashboard
-```  
-  
-![image](https://user-images.githubusercontent.com/61418782/147188835-41bea159-c928-4b9a-a724-cccbb7f96d08.png)
-
-
-
 ## Accessing the containerized app
 
-* Run the following command to the userapi service:
+* Run the following command to the nodeapp service:
 ```bash
  kubectl port-forward service/nodeapp-deployment 3000:3000
 ```  
@@ -450,10 +461,6 @@ The home page of our app should display when going to http://localhost:3000/ on 
 ```bash
 kubectl get pods
 ```  
-Outputs the following:
-   
-![image](https://user-images.githubusercontent.com/61418782/147184947-bfedbd4a-1e16-4a56-95d0-441fd79f991c.png)  
-  
 
 # 7. Making a service mesh using Istio
 
