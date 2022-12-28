@@ -37,6 +37,7 @@ var fooStatus = require('redis-status')({
   port: 6379
 });
 
+
 // If 'foo' is healthy, this route will print 'great'; otherwise it will print
 // the reason that 'foo' is not healthy. A monitoring service like Webmon or
 // Pingdom can raise non-'great' responses as alerts.
