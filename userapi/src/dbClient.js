@@ -15,7 +15,7 @@ const configure = require('./configure')
 // })
 
 var url = require('url');
-var redisURL = url.parse("redis://:p0ac4ad4478fe54b35b6c9b64528a20339dcde4f8defb7ce18cf258ea5a4aba82@ec2-52-19-107-150.eu-west-1.compute.amazonaws.com:28809");
+var redisURL = url.parse(process.env.REDISCLOUD_URL);
 var db = redis.createClient(redisURL.port, redisURL.hostname, {no_ready_check: true});
 
 
