@@ -195,7 +195,7 @@ vagrant up --provision
     
   Then it will download automatically Ansible and will start the provisionning set up by the Ansible playbooks. The playbooks' tasks set up the downloading and enabling of the packages and services that are needed to run the userapi project on the VM. 
 
-  This installation is executed by the VagrantFile wich use the [Run.yml](iac\playbooks\run.yml) and the [Install.yml](iac\playbooks\roles\app\install\tasks\main.yml) to install all the necessary dependencies :
+  This installation is executed by the VagrantFile wich use the [Run.yml](iac/playbooks/run.yml) and the [Install.yml](iac/playbooks/roles/app/install/tasks/main.yml) to install all the necessary dependencies :
 
  ```VagrantFile
  # -*- mode: ruby -*-
@@ -263,7 +263,7 @@ You can see that the files being showen by the terminal are the same than the on
    
 ![Julien](image/sync.png)
 
-We have also kept in the roles folders a "main.yaml" file with tasks for the installation and launch of GitLab on the VM that works fine. If you want to use it you have to go to /part-2, lunch the VM like above. When installed and launched on the VM, you will be able to access the GitLab page through the 20.20.20.2 address on your host machine thanks to the server.vm.network and ip properties in the [Vagrantfile](part-2\Vagrantfile). You should have this response :
+We have also kept in the roles folders a "main.yaml" file with tasks for the installation and launch of GitLab on the VM that works fine. If you want to use it you have to go to /part-2, lunch the VM like above. When installed and launched on the VM, you will be able to access the GitLab page through the 20.20.20.2 address on your host machine thanks to the server.vm.network and ip properties in the [Vagrantfile](part-2/Vagrantfile). You should have this response :
 
 ![Vagrantfile](image/vagrant2.png)
 
